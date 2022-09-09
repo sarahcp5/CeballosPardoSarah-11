@@ -10,7 +10,7 @@ socket.on('products', data => {
 });
 
 function render(data) {
-    console.log(data)
+    console.log("render",data)
     if(data.compr != undefined) {
         $("#compr").append(`(Comprensión ` + `${data.compr}` + `%)`);
     }

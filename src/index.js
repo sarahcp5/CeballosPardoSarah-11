@@ -5,7 +5,7 @@ import { Server } from 'socket.io';
 import services from "../src/dao/config.js";
 
 const app = express();
-const PORT = 8083;
+const PORT = 8080;
 
 const server = app.listen(PORT, () => {
     console.log(`Servidor HTTP escuchando en el puerto ${server.address().port}`);
@@ -27,15 +27,19 @@ app.set('views', './views');
 app.set('view engine', 'handlebars');
 
 io.on('connection', async(socket) => {
+    let id = 0;
     console.log('Un cliente se ha conectado');
-    socket.emit('messages', await services.messagesService.getAll());
+    socket.emit('messages', await services.messagesService.muestroChats());
     socket.emit('products', {products : await services.productsService.getAll()});
 
     socket.on('new-message', async(data) => {
-        try {console.log(data)
-            await services.messagesService.save(data);
-            data.compr = await services.messagesService.calculateCompr();
-            console.log("COM",data.compr)
+        try {
+            let author = await services.authorsService.getIdAuthor(data.author);
+            let message = {
+                author: author,
+                text: data.text
+            }
+            await services.messagesService.save(message);
             io.sockets.emit('messages', [data]);
         } catch (error) {
             console.error("new-product",error);
@@ -73,3 +77,21 @@ app.get("/api/products-test", async(req, res) => {
     res.send(testProducts);
 });
 
+app.get("/api/chat-normalizado", async(req, res) => {
+    let chat = await services.messagesService.chatsNormalized();
+    res.send(chat);
+});
+
+app.get("/api/chat-denormalizado", async(req, res) => {
+    let chat = await services.messagesService.chatsDenormalized();
+    res.send(chat);
+});
+
+app.get('/api/chats',async(req,res) => {
+    let result = await services.messagesService.muestroChats()
+    let mensajes = {
+      id: 'mensajes',
+      mensajes: result
+    }
+    res.send(mensajes)
+  })

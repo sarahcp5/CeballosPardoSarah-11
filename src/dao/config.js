@@ -1,5 +1,5 @@
 const persistence = "MONGO";
-let productsService, cartsService, messagesService;
+let productsService, cartsService, messagesService, authorsService;
 
 switch(persistence) {
     case "MEMORY":
@@ -11,10 +11,12 @@ switch(persistence) {
     case "MONGO":
         const {default:MongoProducts} = await import('./MongoDAO/Products.js');
         const {default:MongoCarts} = await import('./MongoDAO/Carts.js');
-        const {default:MongoMessages} = await import('./MongoDAO/Chat.js');
+        const {default:MongoMessages} = await import('./MongoDAO/Messages.js');
+        const {default:MongoAuthors} = await import('./MongoDAO/Authors.js');
         productsService = new MongoProducts();
         cartsService = new MongoCarts();
         messagesService = new MongoMessages();
+        authorsService = new MongoAuthors();
         break;
     case "FILES":
         const {default:FileProducts} = await import('./FilesDAO/Products.js');
@@ -27,7 +29,8 @@ switch(persistence) {
 const services = {
     productsService,
     cartsService,
-    messagesService
+    messagesService,
+    authorsService
 };
 
 export default services;

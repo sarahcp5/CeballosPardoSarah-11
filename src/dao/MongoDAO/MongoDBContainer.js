@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import  { normalize, schema, denormalize } from 'normalizr';
 
 export default class MongoDBContainer {
     constructor(collection, schema){
@@ -89,5 +90,92 @@ export default class MongoDBContainer {
         return result[0].products;    
     }
 
+    muestroChats = async() => {
+        let chats = await this.model.find().populate("author");
+        return chats;
+    };
+
+    getIdAuthor = async (data) => {
+        let result = await  this.model.find({"email":data.email});
+        if(result.length != 0) {
+            return result[0]._id;
+        }
+        else {
+            let newAuthor = await this.save(data);
+            return newAuthor._id;
+        }
+    };
+
+    reemplaceId = async(data) => {
+        let aux = [];
+        let chat = {};
+        for (const item of data){
+            chat = {
+                id: item._id.toString(),
+                text: item.text,
+                date: item.date,
+                author: {            
+                    id: item.author._id.toString(),
+                    email: item.author.email,
+                    nombre: item.author.nombre,
+                    apellido: item.author.apellido,
+                    edad: item.author.edad,
+                    alias: item.author.alias,
+                    avatar: item.author.avatar
+                }
+            }
+
+            aux.push(chat);
+            chat = {};
+        }
+
+        return aux;
+    }
+      
+    chatsNormalized = async() => {
+
+        let chats = await this.muestroChats();
+        let messagesId = await this.reemplaceId(chats)
+        let messages = {
+            id: "messages",
+            messages: messagesId,
+        };
+
+        const author = new schema.Entity('authors', {}, {idAttribute: 'email'});
+        const message = new schema.Entity('messages', {
+            author:author
+        });
+        const chat = new schema.Entity('posts', {
+            messages:[message]
+        });
+        const normalizedData = normalize(messages, chat);
+      
+        console.log("NORMALIZADO", JSON.stringify(normalizedData))
+        return normalizedData;
+    }   
+
+    chatsDenormalized = async() => {
+
+        let chats = await this.muestroChats();
+        let messagesId = await this.reemplaceId(chats)
+        let messages = {
+            id: "messages",
+            messages: messagesId,
+        };
+
+        const author = new schema.Entity('authors', {}, {idAttribute: 'email'});
+        const message = new schema.Entity('messages', {
+            author:author
+        });
+        const chat = new schema.Entity('posts', {
+            messages:[message]
+        });
+        const normalizedData = normalize(messages, chat);
+
+        let denormalizedData = denormalize(normalizedData.result, chat, normalizedData.entities);
+        console.log("DENORMALIZADO", JSON.stringify(denormalizedData,null,'\t'));
+        return denormalizedData;
+        
+    } 
 }
 

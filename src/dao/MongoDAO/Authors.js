@@ -42,8 +42,11 @@ export default class Authors extends MongoDBContainer {
         await this.deleteAll();
         for (let i = 0; i < quantity; i++) {
             await this.save({
+                email: internet.email(),
                 nombre: name.firstName(),
                 apellido: name.lastName(),
+                edad: parseInt(14),
+                alias: internet.userName(),
                 avatar: internet.avatar()        
             });
         }
@@ -56,7 +59,7 @@ export default class Authors extends MongoDBContainer {
             email: data.email,
             nombre: data.nombre,
             apellido: data.apellido,
-            edad: data.edad,
+            edad: parseInt(data.edad),
             alias: data.alias,
             avatar: data.avatar        
         }

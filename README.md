@@ -2,7 +2,13 @@
 Mocks y normalización
 
 http://localhost:8080
-Chat, por consola se muestra el normaliza y denormaliza.
+Se visualiza el chat.
+
+http://localhost:8080/api/chat-normalizado
+Por consola se muestra el chat normalizado y en la respuesta de la llamada.
+
+http://localhost:8080/api/chat-denormalizado
+Por consola se muestra el chat denormalizado y en la respuesta de la llamada.
 
 http://localhost:8080/api/products-test
 
